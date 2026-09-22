@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="fa" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spotify — Home</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+
+    /* Hero Banner */
+    .hero-banner {
+      position: relative;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: var(--space-8);
+      margin-bottom: var(--space-8);
+      background: linear-gradient(135deg, #0d2137 0%, #0a1628 40%, #090d1a 100%);
+    }
+
+    .hero-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 70% 30%, rgba(0,188,212,0.15) 0%, transparent 60%),
+        radial-gradient(ellipse at 20% 80%, rgba(124,58,237,0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .hero-stars {
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 50% 60%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 70%, rgba(255,255,255,0.2) 0%, transparent 100%),
+        radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 65% 20%, rgba(255,255,255,0.5) 0%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .hero-bg-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.4;
+      z-index: 0;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-greeting {
+      font-size: var(--fs-md);
+      color: var(--text-secondary);
+      margin-bottom: var(--space-2);
+    }
+
+    .hero-title {
+      font-size: var(--fs-5xl);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -2px;
+      margin-bottom: var(--space-3);
+    }
+
+    .hero-subtitle {
+      font-size: var(--fs-base);
+      color: var(--text-secondary);
+      max-width: 400px;
+      margin-bottom: var(--space-6);
+      line-height: 1.6;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+
+    .btn-why {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-5);
+      background: rgba(255,255,255,0.12);
+      border: 1.5px solid rgba(255,255,255,0.25);
+      border-radius: var(--radius-full);
+      color: var(--text-primary);
+      font-size: var(--fs-base);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      backdrop-filter: blur(8px);
+    }
+
+    .btn-why:hover {
+      background: rgba(255,255,255,0.2);
+      border-color: rgba(255,255,255,0.4);
+    }
+
+    /* Content Sections */
+    .content-section {
+      padding: 0 var(--space-8);
+      margin-bottom: var(--space-8);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-5);
+    }
+
+    .section-see-all {
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: color var(--transition-fast);
+    }
+
+    .section-see-all:hover { color: var(--text-primary); }
+
+    /* Hero padding */
+    .hero-section {
+      padding: var(--space-6) var(--space-8) 0;
+    }
+
+    /* Why Recommendation Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: var(--z-modal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-normal);
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-card {
+      background: var(--surface-1);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8);
+      max-width: 440px;
+      width: 90%;
+      position: relative;
+      transform: translateY(20px) scale(0.96);
+      transition: transform var(--transition-normal);
+      border: 1px solid var(--surface-3);
+    }
+
+    .modal-overlay.open .modal-card {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: var(--space-4);
+      right: var(--space-4);
+      background: var(--surface-2);
+      border: none;
+      color: var(--text-secondary);
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      font-size: var(--fs-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition-fast);
+    }
+
+    .modal-close:hover {
+      background: var(--surface-3);
+      color: var(--text-primary);
+    }
+
+    .modal-title {
+      font-size: var(--fs-xl);
+      font-weight: 700;
+      margin-bottom: var(--space-4);
+      color: var(--accent-purple-light);
+    }
+
+    .modal-reason {
+      background: var(--surface-2);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      margin-bottom: var(--space-3);
+      font-size: var(--fs-base);
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .modal-reason strong { color: var(--text-primary); }
+
+    /* Playlist cards - horizontal scroll on mobile */
+    .card-scroll-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-5);
+    }
+
+    /* Liked Songs special card */
+    .liked-card .card-thumb {
+      background: linear-gradient(135deg, #450af5, #c4efd9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+    }
+
+    @media (max-width: 1024px) {
+      .card-scroll-row {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .hero-title { font-size: var(--fs-4xl); }
+    }
+
+    @media (max-width: 768px) {
+      .hero-section { padding: var(--space-4) var(--space-4) 0; }
+      .content-section { padding: 0 var(--space-4); }
+
+      .hero-title { font-size: var(--fs-3xl); letter-spacing: -1px; }
+      .hero-banner { min-height: 220px; padding: var(--space-6); }
+
+      .card-scroll-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-title { font-size: var(--fs-2xl); }
+      .card-scroll-row {
+        display: flex;
+        overflow-x: auto;
+        gap: var(--space-3);
+        padding-bottom: var(--space-2);
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+      }
+      .card-scroll-row .music-card {
+        min-width: 140px;
+        scroll-snap-align: start;
+      }
+    }
+    .sidebar-playlist-cover {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+  display: block;
+}
+ 
+.card-thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:8px;
+}
+
+
+  </style>
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- ══ MOBILE TOP HEADER ════════════════════════════════ -->
+  <header class="top-header" role="banner">
+    <div class="header-logo">
+      <span style="font-size:20px;">🎵</span>
+      <span>Spotify</span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="icon-btn" aria-label="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </button>
+      <div class="avatar-btn" style="background:var(--surface-3);width:32px;height:32px;border-radius:50%;"></div>
+      <button class="hamburger-btn" id="hamburger" aria-label="Open menu" aria-expanded="false">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="app-body">
+
+    <!-- ══ SIDEBAR ════════════════════════════════════════ -->
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
+
+      <div class="sidebar-logo">
+  <img src="img/Spotify_Primary_Logo_RGB_White.png" class="spotify-logo">
+  <span class="logo-text">Spotify</span>
+</div>
+
+
+      <nav class="sidebar-nav" aria-label="Primary">
+        <a href="main.html" class="active" aria-current="page">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          Home
+        </a>
+        <a href="#">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="5" height="14"/><rect x="9" y="3" width="5" height="18"/><rect x="16" y="10" width="5" height="11"/></svg>
+          Library
+        </a>
+        <a href="#">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          Explore
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="aurora.html" class="aurora-nav">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Aurora
+        </a>
+      </nav>
+
+      <div class="sidebar-divider"></div>
+
+      <p class="sidebar-section-title">Recently played</p>
+
+      <div class="sidebar-filter-tabs" role="tablist">
+        <button class="filter-tab active" role="tab" aria-selected="true" onclick="filterTab(this, 'all')">All</button>
+        <button class="filter-tab" role="tab" aria-selected="false" onclick="filterTab(this, 'music')">Music</button>
+        <button class="filter-tab" role="tab" aria-selected="false" onclick="filterTab(this, 'podcast')">Podcast</button>
+      </div>
+
+      <ul class="sidebar-playlist-list" aria-label="Recent playlists">
+  <li>
+    <a href="playlist.html" class="sidebar-playlist-item active" aria-label="Night Mix playlist">
+      <img src="img/7b3e51f0-300d-4a5e-9e4a-ca77362a1674.png" alt="Night Mix" class="sidebar-playlist-cover">
+      <div class="item-info">
+        <div class="item-name">Night Mix</div>
+        <div class="item-sub">Playlist</div>
+      </div>
+    </a>
+  </li>
+
+  <li>
+    <a href="#" class="sidebar-playlist-item" aria-label="Liked songs">
+      <img src="img/liked songs.jpg" alt="Liked Songs" class="sidebar-playlist-cover">
+      <div class="item-info">
+        <div class="item-name">Liked songs</div>
+        <div class="item-sub">Playlist</div>
+      </div>
+    </a>
+  </li>
+
+  <li>
+    <a href="#" class="sidebar-playlist-item" aria-label="clancy playlist">
+      <img src="img/Screenshot 2025-07-07 225614.png" alt="clancy" class="sidebar-playlist-cover">
+      <div class="item-info">
+        <div class="item-name">clancy</div>
+        <div class="item-sub">Album</div>
+      </div>
+    </a>
+  </li>
+
+  <li>
+    <a href="#" class="sidebar-playlist-item" aria-label="classics playlist">
+      <img src="img/fa.jpg" alt="classics" class="sidebar-playlist-cover">
+      <div class="item-info">
+        <div class="item-name">classics</div>
+        <div class="item-sub">Playlist</div>
+      </div>
+    </a>
+  </li>
+
+  <li>
+    <a href="#" class="sidebar-playlist-item" aria-label="instrumental playlist">
+      <img src="img/Screenshot 2025-07-07 225546.png" alt="instrumental" class="sidebar-playlist-cover">
+      <div class="item-info">
+        <div class="item-name">instrumental</div>
+        <div class="item-sub">Playlist</div>
+      </div>
+    </a>
+  </li>
+</ul>
+
+
+    </aside>
+
+    <!-- Overlay for mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()" aria-hidden="true"></div>
+
+    <!-- ══ MAIN CONTENT ═══════════════════════════════════ -->
+    <main class="main-content" id="mainContent" role="main" aria-label="Main content">
+
+      <!-- Desktop Topbar -->
+      <div class="desktop-topbar">
+        <div class="search-bar">
+          <span class="search-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </span>
+          <input type="search" placeholder="Songs, artists, lyrics…" aria-label="Search music" />
+          <span class="mic-icon" title="Search by voice">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          </span>
+        </div>
+        <div class="topbar-right">
+          <button class="icon-btn" aria-label="Notifications">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </button>
+          <div class="avatar-btn" aria-label="User profile" role="button" tabindex="0" style="background:var(--surface-3);"></div>
+        </div>
+      </div>
+
+      <!-- Hero Banner -->
+      <section class="hero-section" aria-label="Featured playlist">
+        <div class="hero-banner">
+          <div class="hero-stars" aria-hidden="true"></div>
+         <img src="img/c5bef7eb-72f5-4cb5-8862-545dd8b25ea2.png" class="hero-bg-img" aria-hidden="true">
+          <div class="hero-content">
+            <p class="hero-greeting">Good evening, Arqavan</p>
+            <h1 class="hero-title">
+              <span class="spring-word">Your</span>
+              <span class="spring-word"> Night</span>
+              <span class="spring-word"> Mix</span>
+            </h1>
+            <p class="hero-subtitle">A handpicked mix of music to match your late-night energy.</p>
+            <div class="hero-actions">
+              <a href="playlist.html" class="btn btn-primary" aria-label="Play Night Mix">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                Play
+              </a>
+              <button class="btn-why" onclick="openModal()" aria-haspopup="dialog">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                Why this recommendation?
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- How are you feeling? -->
+      <section class="content-section" aria-label="Mood filter">
+        <div class="section-header">
+          <h2 class="section-title">How are you feeling?</h2>
+        </div>
+        <div class="mood-chips" role="group" aria-label="Select mood">
+          <button class="mood-chip chill active" onclick="selectMood(this)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+            Chill
+          </button>
+          <button class="mood-chip focused" onclick="selectMood(this)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            Focused
+          </button>
+          <button class="mood-chip energized" onclick="selectMood(this)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            Energized
+          </button>
+          <button class="mood-chip romance" onclick="selectMood(this)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            Romance
+          </button>
+        </div>
+      </section>
+
+      <!-- Made For You -->
+      <section class="content-section" aria-label="Playlists made for you">
+        <div class="section-header">
+          <h2 class="section-title">Made For You</h2>
+          <button class="section-see-all" aria-label="See all playlists made for you">See all</button>
+        </div>
+        <div class="card-scroll-row">
+
+          <article class="music-card" tabindex="0" role="button" aria-label="Discover Weekly playlist" onclick="window.location.href='playlist.html'">
+            <div class="card-thumb" style="background:linear-gradient(135deg,#e91e8c,#7c3aed,#ff6b35);display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:900;color:white;letter-spacing:-1px;font-family:'Inter',sans-serif;">
+              DISCOVER<br>WEEKLY
+            </div>
+            <div class="play-overlay" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <p class="card-title">Discover Weekly</p>
+            <p class="card-sub">Your weekly mixtape</p>
+          </article>
+
+          <article class="music-card" tabindex="0" role="button" aria-label="Hits Different playlist" onclick="window.location.href='playlist.html'">
+            <div class="card-thumb" style="background:linear-gradient(135deg,#b0c4de,#87ceeb,#fff8dc);display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:700;color:#333;text-align:center;padding:8px;">
+              ✦ hits different ✦
+            </div>
+            <div class="play-overlay" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <p class="card-title">*hits different*</p>
+            <p class="card-sub">Pop · Indie</p>
+          </article>
+
+          <article class="music-card" tabindex="0" role="button" aria-label="Daily Mix 01 playlist" onclick="window.location.href='playlist.html'">
+            <div class="card-thumb" style="background:linear-gradient(135deg,#1a1a1a,#333);display:flex;align-items:center;justify-content:center;">
+              <div style="text-align:center;">
+                <div style="font-size:3rem;">👤</div>
+                <div style="font-size:0.75rem;color:#00bcd4;font-weight:700;margin-top:4px;">Daily Mix</div>
+                <div style="font-size:1.5rem;font-weight:900;color:#00bcd4;">01</div>
+              </div>
+            </div>
+            <div class="play-overlay" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <p class="card-title">Daily Mix 01</p>
+            <p class="card-sub">The Weeknd & more</p>
+          </article>
+
+          <article class="music-card" tabindex="0" role="button" aria-label="Daily Mix 03 playlist" onclick="window.location.href='playlist.html'">
+            <div class="card-thumb" style="background:#f5a623;display:flex;align-items:center;justify-content:center;">
+              <div style="text-align:center;">
+                <div style="width:60px;height:60px;border-radius:50%;border:4px solid #e53e00;display:flex;align-items:center;justify-content:center;margin:0 auto;">
+                  <span style="font-size:1.5rem;font-weight:900;color:#e53e00;">⟲</span>
+                </div>
+                <div style="font-size:0.75rem;color:#e53e00;font-weight:700;margin-top:8px;">Daily Mix 03</div>
+              </div>
+            </div>
+            <div class="play-overlay" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <p class="card-title">Daily Mix 03</p>
+            <p class="card-sub">Rock · Alternative</p>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- Jump Back In -->
+     <section class="content-section" aria-label="Jump back in">
+  <div class="section-header">
+    <h2 class="section-title">Jump Back In</h2>
+    <button class="section-see-all" aria-label="See all recent">See all</button>
+  </div>
+
+  <div class="card-scroll-row">
+
+     <article class="music-card liked-card" tabindex="0" role="button" aria-label="Liked Songs" onclick="window.location.href='playlist.html'">
+            <div class="card-thumb" style="background:linear-gradient(135deg,#450af5,#c4efd9);display:flex;align-items:center;justify-content:center;font-size:3rem;">
+              💜
+            </div>
+            <div class="play-overlay" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <p class="card-title">Liked Songs</p>
+            <p class="card-sub">Playlist · 284 songs</p>
+          </article>
+
+    <article class="music-card" tabindex="0" role="button" aria-label="Night Mix" onclick="window.location.href='playlist.html'">
+      <div class="card-thumb">
+        <img src="img/7b3e51f0-300d-4a5e-9e4a-ca77362a1674.png" alt="Night Mix">
+      </div>
+      <div class="play-overlay">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+      </div>
+      <p class="card-title">Night Mix</p>
+      <p class="card-sub">Playlist</p>
+    </article>
+
+    <article class="music-card" tabindex="0" role="button" aria-label="clancy album">
+      <div class="card-thumb">
+        <img src="img/Screenshot 2025-07-07 225614.png" alt="clancy">
+      </div>
+      <div class="play-overlay">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+      </div>
+      <p class="card-title">clancy</p>
+      <p class="card-sub">Album</p>
+    </article>
+
+    <article class="music-card" tabindex="0" role="button" aria-label="classics playlist">
+      <div class="card-thumb">
+        <img src="img/fa.jpg" alt="classics">
+      </div>
+      <div class="play-overlay">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+      </div>
+      <p class="card-title">classics</p>
+      <p class="card-sub">Playlist</p>
+    </article>
+
+  </div>
+</section>
+
+      <!-- Explore -->
+      <section class="content-section" aria-label="Explore more">
+        <div class="section-header">
+          <h2 class="section-title">Explore More</h2>
+        </div>
+        <!-- Tabs -->
+        <div class="tab-list" role="tablist" aria-label="Content filter">
+          <button class="tab-btn active" role="tab" aria-selected="true" onclick="switchTab(this)">All</button>
+          <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab(this)">Music</button>
+          <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab(this)">Podcasts</button>
+          <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab(this)">Artists</button>
+        </div>
+        <div class="card-grid">
+          <article class="music-card" tabindex="0" role="button" aria-label="Peaceful Piano playlist">
+            <div class="card-thumb" style="background:linear-gradient(135deg,#1a3a5c,#4a90d9);display:flex;align-items:center;justify-content:center;font-size:2rem;">🎹</div>
+            <div class="play-overlay" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
+            <p class="card-title">Peaceful Piano</p>
+            <p class="card-sub">Playlist · 50 songs</p>
+          </article>
+          <article class="music-card" tabindex="0" role="button" aria-label="Deep Focus playlist">
+            <div class="card-thumb" style="background:linear-gradient(135deg,#0a1628,#1e3a5f);display:flex;align-items:center;justify-content:center;font-size:2rem;">🎯</div>
+            <div class="play-overlay" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
+            <p class="card-title">Deep Focus</p>
+            <p class="card-sub">Playlist · 35 songs</p>
+          </article>
+          <article class="music-card" tabindex="0" role="button" aria-label="Lo-fi Beats playlist">
+            <div class="card-thumb" style="background:linear-gradient(135deg,#2d1b4e,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:2rem;">🌙</div>
+            <div class="play-overlay" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
+            <p class="card-title">Lo-fi Beats</p>
+            <p class="card-sub">Playlist · 120 songs</p>
+          </article>
+          <article class="music-card" tabindex="0" role="button" aria-label="Top Hits playlist">
+            <div class="card-thumb" style="background:linear-gradient(135deg,#1a0a2e,#e91e8c);display:flex;align-items:center;justify-content:center;font-size:2rem;">⭐</div>
+            <div class="play-overlay" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
+            <p class="card-title">Top Hits 2025</p>
+            <p class="card-sub">Playlist · 80 songs</p>
+          </article>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ══ WHY RECOMMENDATION MODAL ══════════════════════════ -->
+  <div class="modal-overlay" id="whyModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" onclick="closeModal(event)">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModalBtn()" aria-label="Close">✕</button>
+      <h2 class="modal-title" id="modalTitle">✨ Why Night Mix?</h2>
+      <div class="modal-reason">
+        <strong>You've been listening late.</strong> Aurora noticed you play music most often after 10 PM, and your recent sessions feature melancholic lyrics and immersive beats.
+      </div>
+      <div class="modal-reason">
+        Based on your <strong>listening history</strong> — Jeff Buckley, The Weeknd, Arctic Monkeys — Aurora built this mix to match your late-night mood.
+      </div>
+      <div class="modal-reason">
+        <strong>Similar listeners</strong> with your taste profile consistently rate this type of mix highly on evenings like tonight.
+      </div>
+      <a href="aurora.html" class="btn btn-primary" style="margin-top:var(--space-4);width:100%;justify-content:center;">Ask Aurora for more</a>
+    </div>
+  </div>
+
+  <!-- ══ NOW PLAYING BAR ════════════════════════════════════ -->
+  <footer class="player-bar" role="complementary" aria-label="Now playing">
+    <div class="player-left">
+     <div class="player-thumb">
+  <img src="img/Screenshot 2025-07-07 225546.png" alt="Now Playing" class="player-thumb-img">
+</div>
+
+      <div class="player-info">
+        <p class="player-title">Forever</p>
+        <p class="player-artist">keshi</p>
+      </div>
+      <button class="player-like" aria-label="Like Forever by keshi">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </button>
+    </div>
+
+    <div class="player-center">
+      <div class="player-controls">
+        <button class="ctrl-btn" aria-label="Shuffle" title="Shuffle">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+        </button>
+        <button class="ctrl-btn" aria-label="Previous track" title="Previous">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 20L9 12l10-8v16zm-10 0H7V4h2v16z"/></svg>
+        </button>
+        <button class="ctrl-btn play-btn" aria-label="Pause" title="Pause" onclick="togglePlay(this)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </button>
+        <button class="ctrl-btn" aria-label="Next track" title="Next">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8-6-8-6v12zM16 6v12h2V6h-2z"/></svg>
+        </button>
+        <button class="ctrl-btn" aria-label="Repeat" title="Repeat">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        </button>
+      </div>
+      <div class="progress-bar" role="progressbar" aria-label="Track progress" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100">
+        <span class="progress-time" aria-hidden="true">1:24</span>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <span class="progress-time" aria-hidden="true">3:31</span>
+      </div>
+    </div>
+
+    <div class="player-right">
+      <button class="ctrl-btn" aria-label="Lyrics" title="Lyrics">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </button>
+      <div class="volume-control" aria-label="Volume">
+        <button class="ctrl-btn" aria-label="Volume">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        </button>
+        <div class="volume-slider" role="slider" aria-label="Volume" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">
+          <div class="volume-fill" style="width:65%"></div>
+        </div>
+      </div>
+      <button class="ctrl-btn" aria-label="Queue" title="Queue">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      </button>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  /* ── HAMBURGER / SIDEBAR TOGGLE ─────────────────────────── */
+  const hamburger = document.getElementById('hamburger');
+  const sidebar   = document.getElementById('sidebar');
+  const overlay   = document.getElementById('sidebarOverlay');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('visible');
+    hamburger.classList.add('open');
+    hamburger.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('visible');
+    hamburger.classList.remove('open');
+    hamburger.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  hamburger.addEventListener('click', () => {
+    sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { closeSidebar(); closeModalBtn(); }
+  });
+
+  /* ── MOOD SELECTION ─────────────────────────────────────── */
+  function selectMood(btn) {
+    document.querySelectorAll('.mood-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    btn.style.animation = 'none';
+    btn.offsetHeight;
+    btn.style.animation = 'spring-in 0.4s cubic-bezier(0.34,1.56,0.64,1)';
+  }
+
+  /* ── TABS ───────────────────────────────────────────────── */
+  function switchTab(btn) {
+    document.querySelectorAll('.tab-btn').forEach(t => {
+      t.classList.remove('active');
+      t.setAttribute('aria-selected', 'false');
+    });
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected', 'true');
+  }
+
+  /* ── SIDEBAR FILTER ─────────────────────────────────────── */
+  function filterTab(btn, type) {
+    document.querySelectorAll('.filter-tab').forEach(t => {
+      t.classList.remove('active');
+      t.setAttribute('aria-selected', 'false');
+    });
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected', 'true');
+  }
+
+  /* ── WHY MODAL ──────────────────────────────────────────── */
+  function openModal() {
+    document.getElementById('whyModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModalBtn() {
+    document.getElementById('whyModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function closeModal(e) {
+    if (e.target === document.getElementById('whyModal')) closeModalBtn();
+  }
+
+  /* ── PLAY/PAUSE TOGGLE ──────────────────────────────────── */
+  function togglePlay(btn) {
+    const isPaused = btn.dataset.paused === 'true';
+    if (isPaused) {
+      btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+      btn.setAttribute('aria-label', 'Pause');
+      btn.dataset.paused = 'false';
+    } else {
+      btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+      btn.setAttribute('aria-label', 'Play');
+      btn.dataset.paused = 'true';
+    }
+  }
+
+  /* ── SPRING ANIMATION ON LOAD ───────────────────────────── */
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.spring-word').forEach((w, i) => {
+      w.style.opacity = '0';
+      setTimeout(() => {
+        w.style.animation = 'spring-in 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards';
+      }, i * 120);
+    });
+  });
+</script>
+
+</body>
+</html>

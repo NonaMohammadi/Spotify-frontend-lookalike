@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="fa" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spotify — Night Mix Playlist</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── PLAYLIST PAGE SPECIFIC ───────────────────────────── */
+
+    /* Playlist Hero */
+    .playlist-hero {
+      padding: var(--space-8);
+      background: linear-gradient(180deg, rgba(13,33,55,0.9) 0%, var(--bg-primary) 100%);
+      display: flex;
+      align-items: flex-end;
+      gap: var(--space-6);
+      min-height: 220px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .playlist-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 30% 50%, rgba(0,188,212,0.15) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .playlist-cover {
+      width: 160px;
+      height: 160px;
+      border-radius: var(--radius-lg);
+      object-fit: cover;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-lg);
+      background: linear-gradient(135deg, #0d2137, #00bcd4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .playlist-meta {
+      position: relative;
+      z-index: 1;
+    }
+
+    .playlist-type {
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      color: var(--accent-teal);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: var(--space-2);
+    }
+
+    .playlist-title {
+      font-size: var(--fs-5xl);
+      font-weight: 900;
+      letter-spacing: -2px;
+      line-height: 1;
+      margin-bottom: var(--space-3);
+    }
+
+    .playlist-desc {
+      font-size: var(--fs-base);
+      color: var(--text-secondary);
+      margin-bottom: var(--space-3);
+      max-width: 500px;
+      line-height: 1.5;
+    }
+
+    .playlist-made-by {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--fs-sm);
+      color: var(--text-secondary);
+    }
+
+    .playlist-made-by .maker-dot {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-teal));
+      border-radius: 50%;
+    }
+
+    .playlist-made-by a {
+      color: var(--accent-green);
+      font-weight: 600;
+    }
+
+    /* Playlist Actions */
+    .playlist-actions {
+      padding: var(--space-5) var(--space-8);
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+    }
+
+    .btn-edit {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2);
+      border-radius: var(--radius-md);
+      transition: all var(--transition-fast);
+    }
+
+    .btn-edit:hover {
+      color: var(--text-primary);
+      background: var(--surface-1);
+    }
+
+    /* Track Table */
+    .track-table {
+      width: 100%;
+      border-collapse: collapse;
+      padding: 0 var(--space-8);
+      display: table;
+    }
+
+    .track-table-header {
+      display: grid;
+      grid-template-columns: 40px 1fr auto auto;
+      align-items: center;
+      padding: var(--space-3) var(--space-8);
+      border-bottom: 1px solid var(--surface-1);
+      margin-bottom: var(--space-2);
+    }
+
+    .track-col-label {
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .track-col-why {
+      text-align: right;
+    }
+
+    /* Track Row */
+    .track-list {
+      padding: 0 var(--space-4);
+    }
+
+    .track-row {
+      display: grid;
+      grid-template-columns: 40px 1fr auto auto;
+      align-items: center;
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: background var(--transition-fast);
+      gap: var(--space-3);
+    }
+
+    .track-row:hover {
+      background: var(--surface-1);
+    }
+
+    .track-row:hover .track-num { opacity: 0; }
+    .track-row:hover .track-play-icon { opacity: 1; }
+
+    .track-num-cell {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+    }
+
+    .track-num {
+      font-size: var(--fs-base);
+      color: var(--text-muted);
+      transition: opacity var(--transition-fast);
+    }
+
+    .track-play-icon {
+      position: absolute;
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+      color: var(--text-primary);
+    }
+
+    .track-info {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      min-width: 0;
+    }
+
+    .track-thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--surface-2);
+    }
+
+    .track-thumb-placeholder {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .track-text { min-width: 0; }
+
+    .track-name {
+      font-size: var(--fs-base);
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .track-artist {
+      font-size: var(--fs-sm);
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* "Why this track" tag — digital twin insight */
+    .track-why-col {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      justify-content: flex-end;
+    }
+
+    .why-tag {
+      padding: var(--space-1) var(--space-4);
+      border-radius: var(--radius-full);
+      font-size: var(--fs-sm);
+      font-weight: 500;
+      background: var(--surface-2);
+      color: var(--text-secondary);
+      white-space: nowrap;
+      transition: all var(--transition-fast);
+    }
+
+    .track-row:hover .why-tag {
+      background: rgba(124,58,237,0.2);
+      color: var(--accent-purple-light);
+    }
+
+    .track-more-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: all var(--transition-fast);
+    }
+
+    .track-row:hover .track-more-btn {
+      opacity: 1;
+      color: var(--text-primary);
+    }
+
+    .track-more-btn:hover {
+      background: var(--surface-2);
+    }
+
+    /* Currently playing highlight */
+    .track-row.playing {
+      background: rgba(124,58,237,0.1);
+    }
+
+    .track-row.playing .track-name { color: var(--accent-purple-light); }
+    .track-row.playing .track-num  { color: var(--accent-purple-light); }
+
+    /* Divider between tracks */
+    .track-list li + li { border-top: 1px solid rgba(255,255,255,0.03); }
+
+    @media (max-width: 768px) {
+      .playlist-hero {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: var(--space-5) var(--space-4);
+        min-height: auto;
+      }
+
+      .playlist-cover {
+        width: 120px;
+        height: 120px;
+        font-size: 3rem;
+      }
+
+      .playlist-title {
+        font-size: var(--fs-3xl);
+        letter-spacing: -1px;
+      }
+
+      .playlist-actions {
+        padding: var(--space-4);
+      }
+
+      .track-table-header,
+      .track-row {
+        grid-template-columns: 32px 1fr auto;
+        padding-left: var(--space-4);
+        padding-right: var(--space-4);
+      }
+
+      /* Hide "WHY THIS TRACK?" column header on small */
+      .track-col-why { display: none; }
+
+      .track-why-col {
+        display: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .playlist-title { font-size: var(--fs-2xl); }
+      .track-list { padding: 0 var(--space-2); }
+    }
+
+    /* ── SHOW "WHY THIS TRACK" ON MOBILE ───────────────── */
+
+@media (max-width:768px){
+
+  .track-table-header{
+    grid-template-columns:32px 1fr 1fr auto;
+  }
+
+  .track-row{
+    grid-template-columns:32px 1fr 1fr auto;
+  }
+
+  .track-col-why,
+  .track-why-col{
+    display:flex !important;
+    align-items:center;
+  }
+
+}
+
+
+    
+  </style>
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- ══ MOBILE TOP HEADER ════════════════════════════════ -->
+  <header class="top-header" role="banner">
+    <div class="header-logo">
+      <span style="font-size:20px;">🎵</span>
+      <span>Spotify</span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="icon-btn" aria-label="Search">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
+      <button class="hamburger-btn" id="hamburger" aria-label="Open menu" aria-expanded="false">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="app-body">
+
+    <!-- ══ SIDEBAR ════════════════════════════════════════ -->
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
+
+      <div class="sidebar-logo">
+        <span style="font-size:24px;">🎵</span>
+        <span class="logo-text">Spotify</span>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Primary">
+        <a href="main.html">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          Home
+        </a>
+        <a href="#">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="5" height="14"/><rect x="9" y="3" width="5" height="18"/><rect x="16" y="10" width="5" height="11"/></svg>
+          Library
+        </a>
+        <a href="#">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          Explore
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="aurora.html" class="aurora-nav">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Aurora
+        </a>
+      </nav>
+
+      <div class="sidebar-divider"></div>
+
+      <p class="sidebar-section-title">Recently played</p>
+
+      <div class="sidebar-filter-tabs" role="tablist">
+        <button class="filter-tab active" role="tab" aria-selected="true">All</button>
+        <button class="filter-tab" role="tab" aria-selected="false">Music</button>
+        <button class="filter-tab" role="tab" aria-selected="false">Podcast</button>
+      </div>
+
+      <ul class="sidebar-playlist-list" aria-label="Recent playlists">
+  <li>
+    <a href="playlist.html" class="sidebar-playlist-item active" aria-label="Night Mix playlist">
+      <img src="img/7b3e51f0-300d-4a5e-9e4a-ca77362a1674.png" alt="Night Mix" class="sidebar-playlist-cover">
+      <div class="item-info">
+        <div class="item-name">Night Mix</div>
+        <div class="item-sub">Playlist</div>
+      </div>
+    </a>
+  </li>
+
+  <li>
+    <a href="#" class="sidebar-playlist-item" aria-label="Liked songs">
+      <img src="img/liked songs.jpg" alt="Liked Songs" class="sidebar-playlist-cover">
+      <div class="item-info">
+        <div class="item-name">Liked songs</div>
+        <div class="item-sub">Playlist</div>
+      </div>
+    </a>
+  </li>
+
+  <li>
+    <a href="#" class="sidebar-playlist-item" aria-label="clancy playlist">
+      <img src="img/Screenshot 2025-07-07 225614.png" alt="clancy" class="sidebar-playlist-cover">
+      <div class="item-info">
+        <div class="item-name">clancy</div>
+        <div class="item-sub">Album</div>
+      </div>
+    </a>
+  </li>
+
+  <li>
+    <a href="#" class="sidebar-playlist-item" aria-label="classics playlist">
+      <img src="img/fa.jpg" alt="classics" class="sidebar-playlist-cover">
+      <div class="item-info">
+        <div class="item-name">classics</div>
+        <div class="item-sub">Playlist</div>
+      </div>
+    </a>
+  </li>
+
+  <li>
+    <a href="#" class="sidebar-playlist-item" aria-label="instrumental playlist">
+      <img src="img/Screenshot 2025-07-07 225546.png" alt="instrumental" class="sidebar-playlist-cover">
+      <div class="item-info">
+        <div class="item-name">instrumental</div>
+        <div class="item-sub">Playlist</div>
+      </div>
+    </a>
+  </li>
+</ul>
+
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()" aria-hidden="true"></div>
+
+    <!-- ══ MAIN CONTENT ═══════════════════════════════════ -->
+    <main class="main-content" id="mainContent" role="main" aria-label="Playlist: Night Mix">
+
+      <!-- Desktop Topbar -->
+      <div class="desktop-topbar">
+        <div class="search-bar">
+          <span class="search-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </span>
+          <input type="search" placeholder="Songs, artists, lyrics…" aria-label="Search music" />
+          <span class="mic-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          </span>
+        </div>
+        <div class="topbar-right">
+          <button class="icon-btn" aria-label="Notifications">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </button>
+          <div class="avatar-btn" aria-label="User profile" role="button" tabindex="0" style="background:var(--surface-3);"></div>
+        </div>
+      </div>
+
+      <!-- Playlist Hero -->
+      <header class="playlist-hero">
+        <img src="img/7b3e51f0-300d-4a5e-9e4a-ca77362a1674.png" alt="Night Mix cover" class="playlist-cover" />
+
+        <div class="playlist-meta">
+          <p class="playlist-type">Playlist</p>
+          <h1 class="playlist-title">
+            <span class="spring-word">Night</span>
+            <span class="spring-word"> Mix</span>
+          </h1>
+          <p class="playlist-desc">
+            Your AI-curated late-night vibe.<br>
+            Melancholic lyrics, immersive beats, endless feels.
+          </p>
+          <div class="playlist-made-by">
+            <div class="maker-dot" aria-hidden="true"></div>
+            Made for you by
+            <a href="#" aria-label="Spotify curated playlist">Spotify</a>
+          </div>
+        </div>
+      </header>
+
+      <!-- Actions -->
+      <div class="playlist-actions">
+        <button class="btn btn-primary" aria-label="Play Night Mix" onclick="playPlaylist()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          Play
+        </button>
+        <button class="btn btn-secondary" onclick="shufflePlaylist()" aria-label="Shuffle Night Mix">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+          Shuffle
+        </button>
+        <button class="btn-edit" aria-label="Edit playlist">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit
+        </button>
+      </div>
+
+      <!-- Track Table Header -->
+      <div class="track-table-header" role="row" aria-label="Track list columns">
+        <span class="track-col-label" role="columnheader">#</span>
+        <span class="track-col-label" role="columnheader">Title</span>
+        <span class="track-col-label track-col-why" role="columnheader">Why This Track?</span>
+        <span></span>
+      </div>
+
+      <!-- Track List -->
+      <ul class="track-list" role="list" aria-label="Night Mix tracks">
+
+        <li>
+          <div class="track-row playing" role="listitem" tabindex="0" onclick="selectTrack(this, 1)" aria-label="Now playing: Lilac Wine by Jeff Buckley">
+            <div class="track-num-cell">
+              <span class="track-num" aria-hidden="true">1</span>
+              <svg class="track-play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <div class="track-info">
+              <div class="track-thumb-placeholder" style="background:linear-gradient(135deg,#1a1010,#5a3030);" aria-hidden="true">🎵</div>
+              <div class="track-text">
+                <p class="track-name">Lilac Wine</p>
+                <p class="track-artist">Jeff Buckley</p>
+              </div>
+            </div>
+            <div class="track-why-col">
+              <span class="why-tag" title="Aurora's insight for this track">moody nightdrive</span>
+              <button class="track-more-btn" aria-label="More options for Lilac Wine">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+              </button>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="track-row" role="listitem" tabindex="0" onclick="selectTrack(this, 2)" aria-label="Compass by TNBHD">
+            <div class="track-num-cell">
+              <span class="track-num" aria-hidden="true">2</span>
+              <svg class="track-play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <div class="track-info">
+              <div class="track-thumb-placeholder" style="background:linear-gradient(135deg,#1a2a1a,#2a4a2a);" aria-hidden="true">🎵</div>
+              <div class="track-text">
+                <p class="track-name">Compass</p>
+                <p class="track-artist">TNBHD</p>
+              </div>
+            </div>
+            <div class="track-why-col">
+              <span class="why-tag">intimate lyrics</span>
+              <button class="track-more-btn" aria-label="More options for Compass">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+              </button>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="track-row" role="listitem" tabindex="0" onclick="selectTrack(this, 3)" aria-label="Blinding Lights by The Weeknd">
+            <div class="track-num-cell">
+              <span class="track-num" aria-hidden="true">3</span>
+              <svg class="track-play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <div class="track-info">
+              <div class="track-thumb-placeholder" style="background:linear-gradient(135deg,#2a1a10,#6a3a20);" aria-hidden="true">🎵</div>
+              <div class="track-text">
+                <p class="track-name">Blinding Lights</p>
+                <p class="track-artist">The Weeknd</p>
+              </div>
+            </div>
+            <div class="track-why-col">
+              <span class="why-tag">neon nostalgia</span>
+              <button class="track-more-btn" aria-label="More options for Blinding Lights">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+              </button>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="track-row" role="listitem" tabindex="0" onclick="selectTrack(this, 4)" aria-label="505 by Arctic Monkeys">
+            <div class="track-num-cell">
+              <span class="track-num" aria-hidden="true">4</span>
+              <svg class="track-play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <div class="track-info">
+              <div class="track-thumb-placeholder" style="background:linear-gradient(135deg,#1a1a10,#3a3a20);" aria-hidden="true">🎵</div>
+              <div class="track-text">
+                <p class="track-name">505</p>
+                <p class="track-artist">Arctic Monkeys</p>
+              </div>
+            </div>
+            <div class="track-why-col">
+              <span class="why-tag">obsessive longing</span>
+              <button class="track-more-btn" aria-label="More options for 505">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+              </button>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="track-row" role="listitem" tabindex="0" onclick="selectTrack(this, 5)" aria-label="Skyfall by Adele">
+            <div class="track-num-cell">
+              <span class="track-num" aria-hidden="true">5</span>
+              <svg class="track-play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <div class="track-info">
+              <div class="track-thumb-placeholder" style="background:linear-gradient(135deg,#0a1a2a,#1a3a5a);" aria-hidden="true">🎵</div>
+              <div class="track-text">
+                <p class="track-name">Skyfall</p>
+                <p class="track-artist">Adele</p>
+              </div>
+            </div>
+            <div class="track-why-col">
+              <span class="why-tag">epic heartbreak</span>
+              <button class="track-more-btn" aria-label="More options for Skyfall">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+              </button>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="track-row" role="listitem" tabindex="0" onclick="selectTrack(this, 6)" aria-label="Another Love by Tom Odell">
+            <div class="track-num-cell">
+              <span class="track-num" aria-hidden="true">6</span>
+              <svg class="track-play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <div class="track-info">
+              <div class="track-thumb-placeholder" style="background:linear-gradient(135deg,#2a1a2a,#5a3a5a);" aria-hidden="true">🎵</div>
+              <div class="track-text">
+                <p class="track-name">Another Love</p>
+                <p class="track-artist">Tom Odell</p>
+              </div>
+            </div>
+            <div class="track-why-col">
+              <span class="why-tag">emotional exhaustion</span>
+              <button class="track-more-btn" aria-label="More options for Another Love">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+              </button>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="track-row" role="listitem" tabindex="0" onclick="selectTrack(this, 7)" aria-label="Liability by Lorde">
+            <div class="track-num-cell">
+              <span class="track-num" aria-hidden="true">7</span>
+              <svg class="track-play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <div class="track-info">
+              <div class="track-thumb-placeholder" style="background:linear-gradient(135deg,#1a1a2a,#3a3a5a);" aria-hidden="true">🎵</div>
+              <div class="track-text">
+                <p class="track-name">Liability</p>
+                <p class="track-artist">Lorde</p>
+              </div>
+            </div>
+            <div class="track-why-col">
+              <span class="why-tag">raw vulnerability</span>
+              <button class="track-more-btn" aria-label="More options for Liability">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+              </button>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="track-row" role="listitem" tabindex="0" onclick="selectTrack(this, 8)" aria-label="Waves by Dean Lewis">
+            <div class="track-num-cell">
+              <span class="track-num" aria-hidden="true">8</span>
+              <svg class="track-play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <div class="track-info">
+              <div class="track-thumb-placeholder" style="background:linear-gradient(135deg,#102030,#203050);" aria-hidden="true">🎵</div>
+              <div class="track-text">
+                <p class="track-name">Waves</p>
+                <p class="track-artist">Dean Lewis</p>
+              </div>
+            </div>
+            <div class="track-why-col">
+              <span class="why-tag">quiet aftermath</span>
+              <button class="track-more-btn" aria-label="More options for Waves">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+              </button>
+            </div>
+          </div>
+        </li>
+
+      </ul>
+
+      <!-- Aurora suggestion strip at bottom -->
+      <div style="padding:var(--space-8);margin-top:var(--space-4);border-top:1px solid var(--surface-1);">
+        <p class="section-title" style="font-size:var(--fs-lg);">
+          <span class="text-accent">✦</span> Aurora suggests
+        </p>
+        <p style="color:var(--text-secondary);font-size:var(--fs-sm);margin-bottom:var(--space-4);">
+          Based on this playlist's mood profile
+        </p>
+        <div class="card-grid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));">
+          <article class="music-card" tabindex="0" role="button" aria-label="forestwater by hozier">
+            <div class="card-thumb" style="background:linear-gradient(135deg,#142812,#2a5020);display:flex;align-items:center;justify-content:center;font-size:2rem;">🌲</div>
+            <div class="play-overlay" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
+            <p class="card-title">From Eden</p>
+            <p class="card-sub">Hozier</p>
+          </article>
+          <article class="music-card" tabindex="0" role="button" aria-label="Strange by Celeste">
+            <div class="card-thumb" style="background:linear-gradient(135deg,#1a1020,#4a2060);display:flex;align-items:center;justify-content:center;font-size:2rem;">🌙</div>
+            <div class="play-overlay" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
+            <p class="card-title">Strange</p>
+            <p class="card-sub">Celeste</p>
+          </article>
+          <article class="music-card" tabindex="0" role="button" aria-label="Driver by Ben Howard">
+            <div class="card-thumb" style="background:linear-gradient(135deg,#201008,#604030);display:flex;align-items:center;justify-content:center;font-size:2rem;">🚗</div>
+            <div class="play-overlay" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>
+            <p class="card-title">The Fear</p>
+            <p class="card-sub">Ben Howard</p>
+          </article>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ══ NOW PLAYING BAR ════════════════════════════════════ -->
+  <footer class="player-bar" role="complementary" aria-label="Now playing">
+    <div class="player-left">
+      <div class="player-thumb" style="background:linear-gradient(135deg,#1a1010,#5a3030);display:flex;align-items:center;justify-content:center;font-size:1.2rem;border-radius:4px;" aria-hidden="true">🎵</div>
+      <div class="player-info">
+        <p class="player-title" id="playerTitle">Lilac Wine</p>
+        <p class="player-artist" id="playerArtist">Jeff Buckley</p>
+      </div>
+      <button class="player-like" aria-label="Like current track">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </button>
+    </div>
+
+    <div class="player-center">
+      <div class="player-controls">
+        <button class="ctrl-btn" aria-label="Shuffle">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+        </button>
+        <button class="ctrl-btn" aria-label="Previous">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 20L9 12l10-8v16zm-10 0H7V4h2v16z"/></svg>
+        </button>
+        <button class="ctrl-btn play-btn" aria-label="Pause" onclick="togglePlay(this)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </button>
+        <button class="ctrl-btn" aria-label="Next">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8-6-8-6v12zM16 6v12h2V6h-2z"/></svg>
+        </button>
+        <button class="ctrl-btn" aria-label="Repeat">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        </button>
+      </div>
+      <div class="progress-bar" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" aria-label="Track progress">
+        <span class="progress-time" aria-hidden="true">0:42</span>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:20%"></div>
+        </div>
+        <span class="progress-time" aria-hidden="true">3:47</span>
+      </div>
+    </div>
+
+    <div class="player-right">
+      <button class="ctrl-btn" aria-label="Lyrics">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </button>
+      <div class="volume-control" aria-label="Volume">
+        <button class="ctrl-btn" aria-label="Volume">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        </button>
+        <div class="volume-slider" role="slider" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100" aria-label="Volume">
+          <div class="volume-fill" style="width:65%"></div>
+        </div>
+      </div>
+      <button class="ctrl-btn" aria-label="Queue">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      </button>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  /* ── HAMBURGER ──────────────────────────────────────────── */
+  const hamburger = document.getElementById('hamburger');
+  const sidebar   = document.getElementById('sidebar');
+  const overlay   = document.getElementById('sidebarOverlay');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('visible');
+    hamburger.classList.add('open');
+    hamburger.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('visible');
+    hamburger.classList.remove('open');
+    hamburger.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  hamburger.addEventListener('click', () => {
+    sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeSidebar();
+  });
+
+  /* ── TRACK SELECTION ────────────────────────────────────── */
+  const tracks = [
+    { name: 'Lilac Wine',     artist: 'Jeff Buckley'    },
+    { name: 'Compass',        artist: 'TNBHD'           },
+    { name: 'Blinding Lights',artist: 'The Weeknd'      },
+    { name: '505',            artist: 'Arctic Monkeys'  },
+    { name: 'Skyfall',        artist: 'Adele'           },
+    { name: 'Another Love',   artist: 'Tom Odell'       },
+    { name: 'Liability',      artist: 'Lorde'           },
+    { name: 'Waves',          artist: 'Dean Lewis'      },
+  ];
+
+  function selectTrack(row, index) {
+    document.querySelectorAll('.track-row').forEach(r => r.classList.remove('playing'));
+    row.classList.add('playing');
+    const t = tracks[index - 1];
+    if (t) {
+      document.getElementById('playerTitle').textContent  = t.name;
+      document.getElementById('playerArtist').textContent = t.artist;
+    }
+  }
+
+  /* ── KEYBOARD NAVIGATION FOR TRACKS ─────────────────────── */
+  document.querySelectorAll('.track-row').forEach(row => {
+    row.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        row.click();
+      }
+    });
+  });
+
+  /* ── PLAY/PAUSE ─────────────────────────────────────────── */
+  function playPlaylist()   { console.log('Playing Night Mix'); }
+  function shufflePlaylist(){ console.log('Shuffling Night Mix'); }
+
+  function togglePlay(btn) {
+    const isPaused = btn.dataset.paused === 'true';
+    btn.innerHTML = isPaused
+      ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
+      : '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+    btn.setAttribute('aria-label', isPaused ? 'Pause' : 'Play');
+    btn.dataset.paused = (!isPaused).toString();
+  }
+
+  /* ── SPRING ANIMATION ───────────────────────────────────── */
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.spring-word').forEach((w, i) => {
+      w.style.opacity = '0';
+      setTimeout(() => {
+        w.style.animation = 'spring-in 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards';
+      }, i * 120);
+    });
+  });
+</script>
+
+</body>
+</html>
